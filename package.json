@@ -4,6 +4,8 @@
   "description": "Simple multiroom chat server application",
   "dependencies": {
     "mime": "^3.0.0",
+    "mime-db": "^1.52.0",
+    "mime-lookup": "^0.0.2",
     "socket.io": "^4.4.1"
   }
 }
