@@ -22,8 +22,11 @@ body {
 }
 
 .chat-app .chat {
+  display: flex;
+  flex-direction: column;
   margin-left: 280px;
   border-left: 1px solid #eaeaea;
+  height: calc(100% - 60px);
 }
 
 .people-list {
@@ -55,6 +58,8 @@ body {
 .people-list .chat-list img {
   width: 45px;
   border-radius: 50%;
+  object-fit: cover;
+  height: 45px;
 }
 
 .people-list img {
@@ -81,6 +86,8 @@ body {
   float: left;
   border-radius: 40px;
   width: 40px;
+  height: 40px;
+  object-fit: cover;
 }
 
 .chat .chat-header .chat-about {
