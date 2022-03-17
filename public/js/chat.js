@@ -8,10 +8,14 @@ var Chat = function (socket) {
   this.socket = socket;
 };
 
-Chat.prototype.sendMessage = function (room, text) {
+/**
+ *
+ * @param {string} text
+ */
+Chat.prototype.sendMessage = function (text) {
   var message = {
     text: text,
-    room: room,
+    roomId: chatState.currentRoom,
     timestamp: +new Date(),
     avator: User.getUserAvator(),
   };
@@ -19,13 +23,37 @@ Chat.prototype.sendMessage = function (room, text) {
   this.socket.emit("message", message);
 };
 
-Chat.prototype.changeRoom = function (room) {
+/**
+ *
+ * @param {string} roomId
+ */
+Chat.prototype.changeRoom = function (roomId) {
   this.socket.emit("join", {
-    newRoom: room,
+    newRoom: roomId,
   });
 };
 
-Chat.prototype.makeMyMessage = function (message) {
+/**
+ *
+ * @param {{user_id: { _id: string, avator: string, nick_name: string}, text: string, type: string, timestamp: number}} message
+ * @returns {string}
+ */
+Chat.prototype.renderMessage = function (message) {
+  var user_id = User.getUserId();
+  if (user_id === message.user_id._id) {
+    // render my message
+    return this.renderMyMessage(message);
+  } else {
+    return this.renderOtherUsersMessage(message);
+  }
+};
+
+/**
+ *
+ * @param {{user_id: { _id: string, avator: string, nick_name: string}, text: string, type: string, timestamp: number}} message
+ * @returns {string}
+ */
+Chat.prototype.renderMyMessage = function (message) {
   var status = User.getUserStatus();
   return `
         <li class="clearfix">
@@ -50,7 +78,12 @@ Chat.prototype.makeMyMessage = function (message) {
     `;
 };
 
-Chat.prototype.makeOtherUsersMessage = function (message) {
+/**
+ *
+ * @param {{user_id: { _id: string, avator: string, nick_name: string}, text: string, type: string, timestamp: number}} message
+ * @returns {string}
+ */
+Chat.prototype.renderOtherUsersMessage = function (message) {
   var status;
   var userId = message.user_id._id;
   var user = chatState.users.find((user) => user._id === userId);
@@ -79,8 +112,36 @@ Chat.prototype.makeOtherUsersMessage = function (message) {
                 </div>
             </div>
             <div class="message my-message">
-                Project has already been finished and I have results to
-                show you when I get back.
+                ${message.text}
+            </div>
+        </li>
+    `;
+};
+
+/**
+ *
+ * @param {{capacity: number, occupants: number, image: string, name: string}} room
+ * @returns {string}
+ */
+Chat.prototype.renderRoom = function (room) {
+  var roomCapacity = room.capacity;
+  var roomOccupants = room.occupants;
+
+  var status = roomCapacity === roomOccupants ? "busy" : "available";
+
+  return `
+        <li class="clearfix">
+            <img
+            src=${room.image}
+            alt="avatar"
+            />
+            <div class="about">
+            <div class="name">${room.name}</div>
+            <div class="status">
+                <i class="fa fa-circle ${
+                  status === "available" ? "online" : "offline"
+                }"></i> ${status}
+            </div>
             </div>
         </li>
     `;
